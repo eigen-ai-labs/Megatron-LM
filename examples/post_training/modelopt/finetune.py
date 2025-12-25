@@ -1,4 +1,3 @@
-# This script is modified from megatron-lm/examples/post_training/modelopt/finetune.py
 # Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 
 """Supervised Finetuning GPT."""
