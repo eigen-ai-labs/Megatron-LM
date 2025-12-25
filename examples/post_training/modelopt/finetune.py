@@ -1,3 +1,4 @@
+# This script is modified from megatron-lm/examples/post_training/modelopt/finetune.py
 # Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 
 """Supervised Finetuning GPT."""
@@ -391,7 +392,7 @@ def get_batch(data_iterator):
     base model are loaded for offline speculative model training."""
     # TODO: this is pretty hacky, find a better way
     if (not mpu.is_pipeline_first_stage()) and (not mpu.is_pipeline_last_stage()):
-        return None, None, None, None, None
+        return None
 
     args = get_args()
 
@@ -476,6 +477,12 @@ def forward_step(data_iterator, model: GPTModel):
     # Get the batch.
     timers("batch-generator", log_level=2).start()
     batch = get_batch(data_iterator)
+    timers("batch-generator").stop()
+
+    # For middle pipeline stages, batch is None
+    if batch is None:
+        return model(None, None, None), lambda _: (torch.tensor(0.0), {})
+
     tokens = batch["tokens"]
     labels = batch["labels"]
     loss_mask = batch["loss_mask"]
@@ -484,7 +491,6 @@ def forward_step(data_iterator, model: GPTModel):
     if args.export_offline_model:
         aux_hidden_states = batch["aux_hidden_states"]
         hidden_states = batch["hidden_states"]
-    timers("batch-generator").stop()
 
     if args.export_offline_model:
         output_tensor = model(tokens, position_ids, attention_mask, labels=labels, aux_hidden_states=aux_hidden_states, hidden_states=hidden_states,)
