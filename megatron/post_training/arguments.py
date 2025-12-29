@@ -79,7 +79,7 @@ def add_modelopt_args(parser):
 
     # Finetuning
     group.add_argument(
-        "--finetune-hf-dataset", type=str, default=None, help="HF dataset used for finetuning."
+        "--finetune-hf-dataset", nargs='*', default=None, help="HF dataset(s) used for finetuning. Can specify multiple datasets."
     )
     group.add_argument(
         "--finetune-data-split", type=str, default="train", help="HF dataset split used for finetuning."
